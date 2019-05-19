@@ -24,7 +24,8 @@ import com.tcc.CadeMeuBichinho.service.UserDetailsService;
 @EnableAuthorizationServer
 public class AuthorizationServerConfiguration extends
         AuthorizationServerConfigurerAdapter {
-
+    
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -75,5 +76,10 @@ public class AuthorizationServerConfiguration extends
                 .accessTokenValiditySeconds(30) //mudar para 1800
                 .refreshTokenValiditySeconds(30000)
                 .autoApprove(true);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+    	return new BCryptPasswordEncoder();
     }
 }
