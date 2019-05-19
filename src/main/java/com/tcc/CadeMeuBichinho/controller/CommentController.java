@@ -171,7 +171,7 @@ public class CommentController {
 			List<Map<String, String>> commentsMap = new ArrayList<Map<String,String>>();
 			for(Comment comment: comments) {
 				Map<String, String>  map = new HashMap<String, String>();
-                                map.put("id",comment.getId());
+                map.put("id",comment.getId().toString());
 				map.put("nameUser", comment.getUserSend().getName());
 				map.put("phone", comment.getUserSend().getPhone().toString());
 				map.put("phoneWithWhats", comment.getUserSend().getPhoneWithWhats().toString());
