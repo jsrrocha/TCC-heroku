@@ -33,7 +33,6 @@ public class UserController {
 	@Autowired
 	PetController petController;
 
-	@Autowired
 	private PasswordEncoder passwordEncoder;
 
 	@RequestMapping("")

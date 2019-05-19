@@ -165,7 +165,7 @@ public class CommentController {
 			}
 			User userReceived = optionalUserReceived.get();
 			
-			List<Comment> comments = commentRepository
+			List<Comment> comments = commentRepository 
 					.findByNotificationActiveAndUserReceivedOrderByIdAsc(true,userReceived);
 			
 			List<Map<String, String>> commentsMap = new ArrayList<Map<String,String>>();
