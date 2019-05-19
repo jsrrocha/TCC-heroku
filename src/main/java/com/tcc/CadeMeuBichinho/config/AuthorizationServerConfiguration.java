@@ -25,7 +25,6 @@ import com.tcc.CadeMeuBichinho.service.UserDetailsService;
 public class AuthorizationServerConfiguration extends
         AuthorizationServerConfigurerAdapter {
 
-    @Autowired 
     private PasswordEncoder passwordEncoder;
 
     @Autowired
