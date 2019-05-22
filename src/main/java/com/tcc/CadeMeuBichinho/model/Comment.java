@@ -19,7 +19,6 @@ public class Comment {
 	private Long id; 
 	@ManyToOne
 	private Pet pet;
-	
 	@ManyToOne
 	@JsonIgnore
 	private User userReceived;
@@ -27,6 +26,7 @@ public class Comment {
 	@JsonIgnore
 	private User userSend;
 	private Date date; 
+	private String link;
 	private String comment;
 	private Boolean notificationActive;
 
@@ -87,6 +87,14 @@ public class Comment {
 
 	public void setNotificationActive(Boolean notificationActive) {
 		this.notificationActive = notificationActive;
+	}
+
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
 	}
 
 	

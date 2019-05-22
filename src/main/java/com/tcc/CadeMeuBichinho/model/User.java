@@ -30,7 +30,7 @@ public class User {
 	private String email; 
 	@Size(min = 0, max = 500)
 	private String password;
-	private Integer phone;
+	private Long phone;
 	private Boolean phoneWithWhats;
 	@JsonIgnore
 	@OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE)
@@ -70,16 +70,15 @@ public class User {
 	public void setPassword(String password) throws NoSuchAlgorithmException {
 		this.password = password;
 	}
-
-	
-	public Integer getPhone() {
+    
+	public Long getPhone() {
 		return phone;
 	}
-	
-	public void setPhone(Integer phone) {
+
+	public void setPhone(Long phone) {
 		this.phone = phone;
 	}
-	
+
 	public String getName() {
 		return name;
 	}

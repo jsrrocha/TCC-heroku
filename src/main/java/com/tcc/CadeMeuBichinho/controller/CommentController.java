@@ -81,6 +81,9 @@ public class CommentController {
 			comment.setUserReceived(userReceived);  //Usuário logado
 			comment.setUserSend(userSend);          //Usuário que comentou no pet..
 			comment.setComment(commentPet.get("comment")); 
+			if(commentPet.get("link") !=null) {
+				comment.setLink(commentPet.get("link")); 
+			}
 			
 			commentRepository.save(comment);
 			
@@ -137,16 +140,17 @@ public class CommentController {
 	@PostMapping("/notification/desactive/{id}")
 	public ResponseEntity<?> desactiveNotifications(@PathVariable Long id){
 		try {	
-			
 			Optional<Comment> comment = commentRepository.findById(id);
 			if(!comment.isPresent()) {
 				return new ResponseEntity<String>("Comentário não existe", HttpStatus.BAD_REQUEST); 
 			}
 			Comment desactiveComment = comment.get();
 			desactiveComment.setNotificationActive(false);
-			
 			commentRepository.save(desactiveComment);
-			return new ResponseEntity<Object>("Notificação removida com sucesso", HttpStatus.OK); 
+			
+			Map<String, String> msg = new HashMap<String, String>();
+			msg.put("msg", "Notificação removida com sucesso");
+			return new ResponseEntity<Object>(msg, HttpStatus.OK); 
 		}catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
@@ -157,16 +161,22 @@ public class CommentController {
 	@GetMapping("/notification/user/{userId}/active/asc")
 	public ResponseEntity<?> getActiveNotificationByUserAndOrderAsc(@PathVariable Long userId){ 
 		try {
-			
 			Optional<User> optionalUserReceived = userRepository.
 					findById(userId);			
 			if(!optionalUserReceived.isPresent()) {
 						return new ResponseEntity<String>("User logado não existe", HttpStatus.BAD_REQUEST); 
 			}
 			User userReceived = optionalUserReceived.get();
+			User admin = userRepository.findByEmail("cademeubichinho02@outlook.com");
 			
-			List<Comment> comments = commentRepository 
-					.findByNotificationActiveAndUserReceivedOrderByIdAsc(true,userReceived);
+			List<Comment> comments = new ArrayList<Comment>();
+			if(userReceived.equals(admin)) {
+				comments = commentRepository 
+						.findAllByOrderByIdAsc(); 
+			}else {
+				comments = commentRepository 
+						.findByNotificationActiveAndUserReceivedOrderByIdAsc(true,userReceived);
+			} 
 			
 			List<Map<String, String>> commentsMap = new ArrayList<Map<String,String>>();
 			for(Comment comment: comments) {
@@ -183,7 +193,8 @@ public class CommentController {
 				
 				map.put("date", comment.getDate().toString());
 				map.put("comment", comment.getComment());
-				
+				map.put("link", comment.getLink());
+
 				commentsMap.add(map);
 			}
 			
@@ -203,8 +214,10 @@ public class CommentController {
 			}
 			Comment removeComment = comment.get();
 			commentRepository.delete(removeComment);
-
-			return new ResponseEntity<Object>("Comentário removido com sucesso", HttpStatus.OK); 
+			
+			Map<String, String> msg = new HashMap<String, String>();
+			msg.put("msg", "Comentário removido com sucesso");
+			return new ResponseEntity<>(msg, HttpStatus.OK); 
 		}catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 

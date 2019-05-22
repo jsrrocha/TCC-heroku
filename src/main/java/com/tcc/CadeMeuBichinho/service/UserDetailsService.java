@@ -8,10 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import com.tcc.CadeMeuBichinho.repository.UserRepository;
 import com.tcc.CadeMeuBichinho.model.User;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority; 
 
@@ -26,11 +24,9 @@ public class UserDetailsService implements org.springframework.security.core.use
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 	    User user = userRepository.findByEmail(email);
-
 	    if (user == null) {
 	        throw new UsernameNotFoundException("Not found!");
 	    }  
-	    //Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
 	    
 	    return new org.springframework.security.core.userdetails.User
 				(user.getEmail(), user.getPassword(), getGrantedAuthorities());

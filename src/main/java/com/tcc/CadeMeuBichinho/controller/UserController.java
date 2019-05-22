@@ -6,13 +6,13 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.HashMap;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tcc.CadeMeuBichinho.config.AuthorizationServerConfiguration;
 import com.tcc.CadeMeuBichinho.model.User;
 import com.tcc.CadeMeuBichinho.repository.UserRepository;
 
@@ -33,7 +34,8 @@ public class UserController {
 	@Autowired
 	PetController petController;
 
-	private PasswordEncoder passwordEncoder;
+	@Autowired
+	public AuthorizationServerConfiguration authorizationServerConfiguration;
 
 	@RequestMapping("")
 	public Principal getCurrentLoggedInUser(Principal user) {
@@ -44,10 +46,10 @@ public class UserController {
 	@PostMapping("/add")
 	public ResponseEntity<?> adduser(@RequestBody Map<String, String> userMap) {
 		try {
+
 			if (userMap.get("email") == null) {
 				return new ResponseEntity<>("Preencha o email", HttpStatus.BAD_REQUEST);
 			}
-
 			if (userMap.get("password") == null) {
 				return new ResponseEntity<>("Preencha a senha", HttpStatus.BAD_REQUEST);
 			}
@@ -67,16 +69,34 @@ public class UserController {
 			user.setName(userMap.get("name"));
 			user.setEmail(userMap.get("email"));
 
-			String pass = passwordEncoder.encode(userMap.get("password"));
+			String pass = authorizationServerConfiguration.passwordEncoder.encode(userMap.get("password"));
 			user.setPassword(pass);
-			user.setPhone(Integer.parseInt(userMap.get("phone")));
+			user.setPhone(Long.parseLong(userMap.get("phone")));
 			user.setPhoneWithWhats(Boolean.valueOf(userMap.get("phoneWithWhats")));
 			user.setActive(true);
 
 			user = userRepository.save(user);
-		    Map<String, Object> newUserMap = buildUserMap(user); 
-
+			Map<String, Object> newUserMap = buildUserMap(user);
 			return new ResponseEntity<>(newUserMap, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Algo deu errado", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<?> logoutUser() {
+		try {
+			Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
+
+			if (loggedInUser.getName().equals("anonymousUser")) {
+				return new ResponseEntity<>(null, HttpStatus.OK);
+			}
+			OAuth2Authentication oAuth2Authentication = (OAuth2Authentication) loggedInUser;
+			OAuth2AccessToken token = authorizationServerConfiguration.tokenStore().getAccessToken(oAuth2Authentication);
+			authorizationServerConfiguration.tokenStore().removeAccessToken(token);
+			
+			return new ResponseEntity<>(null, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>("Algo deu errado", HttpStatus.BAD_REQUEST);
@@ -123,7 +143,7 @@ public class UserController {
 			}
 
 			editUser = userRepository.save(editUser);
-		    Map<String, Object> userMap = buildUserMap(editUser); 
+			Map<String, Object> userMap = buildUserMap(editUser);
 
 			return new ResponseEntity<>(userMap, HttpStatus.OK);
 		} catch (Exception e) {
@@ -131,8 +151,6 @@ public class UserController {
 			return new ResponseEntity<>("Algo deu errado", HttpStatus.BAD_REQUEST);
 		}
 	}
-
-	
 
 	@Transactional
 	@PostMapping("/add/password/new")
@@ -154,7 +172,7 @@ public class UserController {
 				return new ResponseEntity<>("Preencha a confirmação da nova senha", HttpStatus.BAD_REQUEST);
 			}
 
-			Integer phone = Integer.parseInt(userMap.get("phone"));
+			Long phone = Long.parseLong(userMap.get("phone"));
 			User userExist = userRepository.findByEmailAndPhone(userMap.get("email"), phone);
 			if (userExist == null) {
 				return new ResponseEntity<>("Usuário com este email e telefone não existe", HttpStatus.BAD_REQUEST);
@@ -164,7 +182,7 @@ public class UserController {
 				return new ResponseEntity<>("Senhas não conferem", HttpStatus.BAD_REQUEST);
 			}
 
-			String pass = passwordEncoder.encode(userMap.get("newPassword"));
+			String pass = authorizationServerConfiguration.passwordEncoder.encode(userMap.get("newPassword"));
 			userExist.setPassword(pass);
 
 			userRepository.save(userExist);
@@ -180,20 +198,20 @@ public class UserController {
 	}
 
 	@GetMapping("/loggedIn")
-	public ResponseEntity<?> getLogged(){
+	public ResponseEntity<?> getLogged() {
 		try {
-		    Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
-		
-		    if(loggedInUser.getName().equals("anonymousUser")) {
-		    	return new ResponseEntity<>(null, HttpStatus.OK);
-		    }
-		    User user = userRepository.findByEmail(loggedInUser.getName());
-		    Map<String, Object> userMap = buildUserMap(user);
+			Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
 
-			return new ResponseEntity<>(userMap, HttpStatus.OK); 
-		}catch (Exception e) {
+			if (loggedInUser.getName().equals("anonymousUser")) {
+				return new ResponseEntity<>(null, HttpStatus.OK);
+			}
+			User user = userRepository.findByEmail(loggedInUser.getName());
+			Map<String, Object> userMap = buildUserMap(user);
+
+			return new ResponseEntity<>(userMap, HttpStatus.OK);
+		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>("Algo deu errado", HttpStatus.BAD_REQUEST); 
+			return new ResponseEntity<>("Algo deu errado", HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -205,9 +223,9 @@ public class UserController {
 			if (!optionalUser.isPresent()) {
 				return new ResponseEntity<String>("User não existe", HttpStatus.BAD_REQUEST);
 			}
-			
+
 			User user = optionalUser.get();
-		    Map<String, Object> userMap = buildUserMap(user); 
+			Map<String, Object> userMap = buildUserMap(user);
 
 			return new ResponseEntity<>(userMap, HttpStatus.OK);
 		} catch (Exception e) {
@@ -257,12 +275,5 @@ public class UserController {
 		userMap.put("phoneWithWhats", user.getPhoneWithWhats().toString());
 		return userMap;
 	}
-	/*
-	if (userMap.get("idPet") != null) {
-		ResponseEntity<?> response = petController.addUserOfPet(user.getId(), Long.parseLong(userMap.get("idPet")));
-		if (response.getStatusCode() != HttpStatus.OK) {
-			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-			return response;
-		}
-	} */
+
 }

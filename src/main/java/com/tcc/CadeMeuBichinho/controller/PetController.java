@@ -35,7 +35,6 @@ import com.tcc.CadeMeuBichinho.repository.UserRepository;
 @RestController
 @RequestMapping("pet")
 public class PetController { 
-
 	@Autowired
 	PetRepository petRepository;
 	
@@ -157,6 +156,8 @@ public class PetController {
 			pet.setRemovalReason(null);
 			petRepository.save(pet);
 			
+			System.out.println("**Temos "+ petRepository.count() + "pets");
+			
 			return new ResponseEntity<Pet>(pet, HttpStatus.OK); 
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -181,53 +182,6 @@ public class PetController {
 			if(petMap.get("name") != null) {
 				editPet.setName(petMap.get("name"));
 			}
-			
-			/*
-			if(petMap.get("specie") != null) {
-				Integer index = Integer.parseInt(petMap.get("type"));
-				Specie type = Specie.values()[index];  
-				editPet.setSpecie(type); 
-			}
-
-			if(petMap.get("sex") != null) {
-				Integer index = Integer.parseInt(petMap.get("sex"));
-				Sex sex = Sex.values()[index];  
-				editPet.setSex(sex);
-			}
-
-			if(petMap.get("furColor") != null) {
-				Integer index = Integer.parseInt(petMap.get("furColor"));
-				FurColor fur = FurColor.values()[index];  
-				editPet.setFurColor(fur);
-			}
-
-			if(petMap.get("lifeStages") != null) {
-				Integer index = Integer.parseInt(petMap.get("lifeStages"));
-				LifeStage lifeStage = LifeStage.values()[index];  
-				editPet.setLifeStage(lifeStage);
-			}
-			
-			if(petMap.get("latitude") != null) {
-				Double latitude = Double.parseDouble(petMap.get("latitude"));
-				editPet.setLatitude(latitude);
-			}
-
-			if(petMap.get("longitude") != null) {
-				Double longitude = Double.parseDouble(petMap.get("longitude"));
-				editPet.setLongitude(longitude);
-			}
-			
-			if(petMap.get("date") != null) {
-				Date date = new Date(Long.parseLong(petMap.get("date")));
-				editPet.setDate(date);
-			}
-			
-			if(petMap.get("lostPet") != null) {
-				Boolean lostPet  = Boolean.valueOf(petMap.get("lostPet"));
-				editPet.setLostPet(lostPet);
-			}	
-			
-			*/
 
 			if(petMap.get("photo") != null) {
 				byte[] backToBytes = Base64.decodeBase64(petMap.get("photo"));
@@ -261,38 +215,12 @@ public class PetController {
 
 	}
 	
-	@PostMapping("/{petId}/add/user/{userId}")
-	public ResponseEntity<?> addUserOfPet(@PathVariable Long petId, @PathVariable Long userId) {
-		try {
-			Optional<Pet> getPet = petRepository.findById(petId);
-			if (!getPet.isPresent()) {
-				return new ResponseEntity<String>("Pet não existe", HttpStatus.BAD_REQUEST);
-			}
-			Pet pet = getPet.get();
-			if (pet.getUser() != null) {
-				return new ResponseEntity<String>("Pet já possui usuário", HttpStatus.BAD_REQUEST);
-			}
-
-			Optional<User> optionalUser = userRepository.findById(userId);
-			if (!optionalUser.isPresent()) {
-				return new ResponseEntity<String>("User não existe", HttpStatus.BAD_REQUEST);
-			}
-			User user = optionalUser.get();
-			pet.setUser(user);
-			petRepository.save(pet);
-
-			return new ResponseEntity<>(null, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>("Algo deu errado", HttpStatus.BAD_REQUEST);
-		}
-	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getPet(@PathVariable Long id){
 		try {
-			Optional<Pet> getPet = petRepository.findById(id);
-			return new ResponseEntity<Optional<Pet>>(getPet, HttpStatus.OK); 
+			Optional<Pet> optionalPet = petRepository.findById(id);
+			return new ResponseEntity<Pet>(optionalPet.get(), HttpStatus.OK); 
 		}catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
@@ -304,7 +232,6 @@ public class PetController {
 	public ResponseEntity<?> getAll(){
 		try {
 			List<Pet> pets = petRepository.findAll(); 
-			
 			List<Map<String, Object>> petsMap = new ArrayList<Map<String,Object>>();
 			petsMap = buildPetsMap(pets);
 			
@@ -319,7 +246,6 @@ public class PetController {
 	@PostMapping("/search")
 	public ResponseEntity<?> petSearch(@RequestBody Map<String, String> pet){
 		try {
-			
 			List<Pet> pets = petRepository.findBySearchTerms(pet);
 			
 			List<Map<String, Object>> petsMap = new ArrayList<Map<String,Object>>();
@@ -388,8 +314,10 @@ public class PetController {
 			removePet.setRemovalReason(removalReason);
 
 			petRepository.save(removePet);
-
-			return new ResponseEntity<String>("Pet removido com sucesso", HttpStatus.OK); 
+			
+			Map<String, String> msg = new HashMap<String, String>();
+			msg.put("msg", "Pet removido com sucesso");
+			return new ResponseEntity<>(msg,HttpStatus.OK); 
 		}catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 

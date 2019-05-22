@@ -9,4 +9,5 @@ import com.tcc.CadeMeuBichinho.model.User;
 
 public interface CommentRepository extends CrudRepository<Comment, Long>{ 
 	public List<Comment> findByNotificationActiveAndUserReceivedOrderByIdAsc(Boolean notificationActive,User user);
+	public List<Comment> findAllByOrderByIdAsc(); 
 }
