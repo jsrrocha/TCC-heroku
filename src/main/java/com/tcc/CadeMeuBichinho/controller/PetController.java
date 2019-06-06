@@ -37,7 +37,6 @@ import com.tcc.CadeMeuBichinho.repository.UserRepository;
 public class PetController { 
 	@Autowired
 	PetRepository petRepository;
-	
 	@Autowired
 	UserRepository userRepository;
 	
@@ -151,13 +150,10 @@ public class PetController {
 				User user = optionalUser.get();
 				pet.setUser(user);
 			}	
-
 			pet.setRemove(false);
 			pet.setRemovalReason(null);
 			petRepository.save(pet);
-			
-			System.out.println("**Temos "+ petRepository.count() + "pets");
-			
+					
 			return new ResponseEntity<Pet>(pet, HttpStatus.OK); 
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -168,7 +164,6 @@ public class PetController {
 	@PostMapping("/edit")
 	public ResponseEntity<?> editPet(@RequestBody Map<String, String> petMap){
 		try {
-			
 			if(petMap.get("id") ==null) {
 				return new ResponseEntity<String>("Preencha o id do pet", HttpStatus.BAD_REQUEST); 
 			}
@@ -212,15 +207,24 @@ public class PetController {
 			e.printStackTrace();
 			return new ResponseEntity<>("Algo deu errado", HttpStatus.BAD_REQUEST); 
 		}
-
 	}
 	
-
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getPet(@PathVariable Long id){
 		try {
 			Optional<Pet> optionalPet = petRepository.findById(id);
 			return new ResponseEntity<Pet>(optionalPet.get(), HttpStatus.OK); 
+		}catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
+		}
+	}
+	
+	@GetMapping("/count")
+	public ResponseEntity<?> getCountPet(){
+		try {
+			Long total = petRepository.count();
+			return new ResponseEntity<>(total, HttpStatus.OK); 
 		}catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
@@ -269,30 +273,6 @@ public class PetController {
 			petsMap = buildPetsMap(pets);
 			
 			return new ResponseEntity<>(petsMap, HttpStatus.OK); 
-		}catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
-		}
-	}
-	
-	@Transactional 
-	@GetMapping("/lost")
-	public ResponseEntity<?> getLostPet(){
-		try {
-			List<Pet> pets = petRepository.findByLostPet(true);
-			return new ResponseEntity<>(pets, HttpStatus.OK); 
-		}catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
-		}
-	}
-
-	@Transactional 
-	@GetMapping("/find")
-	public ResponseEntity<?> getFindPet(){
-		try {
-			List<Pet> pets =  petRepository.findByLostPet(false);
-			return new ResponseEntity<Iterable<Pet>>(pets, HttpStatus.OK); 
 		}catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 

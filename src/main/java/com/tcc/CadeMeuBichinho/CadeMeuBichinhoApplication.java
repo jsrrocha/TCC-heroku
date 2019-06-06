@@ -34,10 +34,11 @@ class ServiceAdmin {
 			
 			if (user == null) {
 				User admin = new User();
-				admin.setName("Admin");
+				admin.setName("Admin geral");
 				admin.setPhone(new Long(51992582113L));
 				admin.setPhoneWithWhats(true);
 				admin.setEmail("cademeubichinho02@outlook.com");
+				admin.setActive(true);
 				String pass = authorizationServerConfiguration.passwordEncoder.encode("admin123456");
 				admin.setPassword(pass); 
 				userRepository.save(admin);

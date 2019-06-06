@@ -83,10 +83,10 @@ public class PetRepositoryImpl implements PetRepositoryCustom{
 			Double latitude = Double.parseDouble(petMap.get("latitude"));
 			Double longitude = Double.parseDouble(petMap.get("longitude"));
 			
-			Double latitudeMoreOneKM = latitude + 0.009044 ;
-			Double latitudeLessOneKM = latitude - 0.009044 ;
-			Double longitudeMoreOneKM = longitude + 0.0089831 ;
-			Double longitudeLessOneKM = longitude - 0.0089831 ;
+			Double latitudeMoreOneKM = latitude + 0.009044 * 5 ;
+			Double latitudeLessOneKM = latitude - 0.009044  * 5;
+			Double longitudeMoreOneKM = longitude + 0.0089831 * 5;
+			Double longitudeLessOneKM = longitude - 0.0089831  * 5;
 			
 		    predicates.add(cb.between(pet.get("latitude"), latitudeLessOneKM, latitudeMoreOneKM));
 		    predicates.add(cb.between(pet.get("longitude"), longitudeLessOneKM, longitudeMoreOneKM));

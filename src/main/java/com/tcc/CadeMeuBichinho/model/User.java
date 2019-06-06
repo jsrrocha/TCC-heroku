@@ -36,9 +36,6 @@ public class User {
 	@OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE)
 	private List<Pet> pets;
 	@JsonIgnore
-	@OneToMany(mappedBy = "userSend",cascade = CascadeType.ALL) 
-	private List<Comment> messagesSend;
-	@JsonIgnore
 	@OneToMany(mappedBy = "userReceived",cascade = CascadeType.ALL)
 	private List<Comment> messagesReceived;
 	private Boolean active;
@@ -105,17 +102,6 @@ public class User {
 	public void setPets(List<Pet> pets) {
 		this.pets = pets;
 	}
-
-
-	public List<Comment> getMessagesSend() {
-		return messagesSend;
-	}
-
-
-	public void setMessagesSend(List<Comment> messagesSend) {
-		this.messagesSend = messagesSend;
-	}
-
 
 	public List<Comment> getMessagesReceived() {
 		return messagesReceived;

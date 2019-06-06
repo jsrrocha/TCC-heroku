@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.tcc.CadeMeuBichinho.model.Comment;
 import com.tcc.CadeMeuBichinho.model.Pet;
 import com.tcc.CadeMeuBichinho.model.User;
@@ -31,196 +30,141 @@ import com.tcc.CadeMeuBichinho.repository.UserRepository;
 public class CommentController {
 	@Autowired
 	CommentRepository commentRepository;
-
 	@Autowired
 	UserRepository userRepository;
-
 	@Autowired
 	PetRepository petRepository;
 
 	@PostMapping("/add")
-	public ResponseEntity<?> addComment(@RequestBody Map<String, String>  commentPet){
+	public ResponseEntity<?> addComment(@RequestBody Map<String, String> commentPet) {
 		try {
-			
-			if(commentPet.get("idPet") == null
-			    || commentPet.get("idReceived") == null) {
-				return new ResponseEntity<String>("Preencha os ids do usuário e do pet", HttpStatus.BAD_REQUEST); 
-			} 
-				
-			Optional<User> optionalUserReceived = userRepository.
-					findById(Long.parseLong(commentPet.get("idReceived"))); 
-			if(!optionalUserReceived.isPresent()) {
-				return new ResponseEntity<String>("User não existe", HttpStatus.BAD_REQUEST); 
+			if (commentPet.get("idPet") == null || commentPet.get("idReceived") == null) {
+				return new ResponseEntity<String>("Preencha os ids do usuário e do pet", HttpStatus.BAD_REQUEST);
+			}
+		
+			if (commentPet.get("userName") == null || commentPet.get("userPhone") == null
+					|| commentPet.get("userPhoneWithWhats") == null) {
+				return new ResponseEntity<String>("Preencha os dados do usuário", HttpStatus.BAD_REQUEST);
+			}
+
+			Optional<User> optionalUserReceived = userRepository.findById(Long.parseLong(commentPet.get("idReceived")));
+			if (!optionalUserReceived.isPresent()) {
+				return new ResponseEntity<String>("User não existe", HttpStatus.BAD_REQUEST);
 			}
 			User userReceived = optionalUserReceived.get();
 
-			Optional<Pet> getPet = petRepository.
-					findById(Long.parseLong(commentPet.get("idPet"))); 
-			if(!getPet.isPresent()) {
-				return new ResponseEntity<String>("Pet não existe", HttpStatus.BAD_REQUEST); 
+			Optional<Pet> getPet = petRepository.findById(Long.parseLong(commentPet.get("idPet")));
+			if (!getPet.isPresent()) {
+				return new ResponseEntity<String>("Pet não existe", HttpStatus.BAD_REQUEST);
 			}
 			Pet pet = getPet.get();
-			
-			User userSend = null;
-			if(!commentPet.get("idSend").equals("")){
-				Optional<User> optionalUserSend = userRepository.
-						findById(Long.parseLong(commentPet.get("idSend")));			
-				if(!optionalUserSend.isPresent()) {
-							return new ResponseEntity<String>("User que enviou não existe", HttpStatus.BAD_REQUEST); 
-				}
-				userSend = optionalUserSend.get();
-			}
-			
+
 			SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			Date date = simpleFormat.parse(commentPet.get("date"));
-			
+
 			Comment comment = new Comment();
 			comment.setDate(date);
+			comment.setComment(commentPet.get("comment"));
+                        comment.setLink(commentPet.get("link"));
 			comment.setNotificationActive(true);
-			comment.setPet(pet);
-			comment.setUserReceived(userReceived);  //Usuário logado
-			comment.setUserSend(userSend);          //Usuário que comentou no pet..
-			comment.setComment(commentPet.get("comment")); 
-			if(commentPet.get("link") !=null) {
-				comment.setLink(commentPet.get("link")); 
-			}
 			
+			comment.setUserName(commentPet.get("userName")); 
+			comment.setUserPhone(Long.parseLong(commentPet.get("userPhone"))); 
+			comment.setUserPhoneWithWhats(Boolean.valueOf(commentPet.get("userPhoneWithWhats")));
+			
+            comment.setUserReceived(userReceived); // Usuário logado
+            comment.setPet(pet);
+
 			commentRepository.save(comment);
-			
-			return new ResponseEntity<Comment>(comment, HttpStatus.OK); 
-		}catch (Exception e) {
+			return new ResponseEntity<Comment>(comment, HttpStatus.OK);
+		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
-		}
-	}
-
-	@Transactional
-	@PostMapping("/edit")
-	public ResponseEntity<?> editComment(@RequestBody Map<String, String>  commentPet){
-		try {
-			if(commentPet.get("id") ==null) {
-				return new ResponseEntity<String>("Preencha o id do comentário", HttpStatus.BAD_REQUEST); 
-			}
-			
-			if(commentPet.get("comment") == null) {
-				return new ResponseEntity<String>("Preencha o novo comentário", HttpStatus.BAD_REQUEST); 
-			}
-			
-			Optional<Comment> optionalComment= commentRepository.findById(Long.parseLong(commentPet.get("id")));
-			if(!optionalComment.isPresent()) {
-				return new ResponseEntity<String>("Comentário não existe", HttpStatus.BAD_REQUEST); 
-			}
-			
-			Comment editComment = optionalComment.get();
-			editComment.setComment(commentPet.get("comment"));
-
-			return new ResponseEntity<Comment>(editComment, HttpStatus.OK); 
-		}catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
-		}
-	}
-
-	@Transactional 
-	@GetMapping("/{id}")
-	public ResponseEntity<?> getComment(@PathVariable Long id){
-		try {
-			Optional<Comment> getComment= commentRepository.findById(id);
-			if(!getComment.isPresent()) {
-				return new ResponseEntity<String>("Comentário não existe", HttpStatus.BAD_REQUEST); 
-			}
-			Comment comment = getComment.get();
-			return new ResponseEntity<Comment>(comment, HttpStatus.OK); 
-		}catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
+			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	@PostMapping("/notification/desactive/{id}")
-	public ResponseEntity<?> desactiveNotifications(@PathVariable Long id){
-		try {	
+	public ResponseEntity<?> desactiveNotifications(@PathVariable Long id) {
+		try {
 			Optional<Comment> comment = commentRepository.findById(id);
-			if(!comment.isPresent()) {
-				return new ResponseEntity<String>("Comentário não existe", HttpStatus.BAD_REQUEST); 
+			if (!comment.isPresent()) {
+				return new ResponseEntity<String>("Comentário não existe", HttpStatus.BAD_REQUEST);
 			}
 			Comment desactiveComment = comment.get();
 			desactiveComment.setNotificationActive(false);
 			commentRepository.save(desactiveComment);
-			
+
 			Map<String, String> msg = new HashMap<String, String>();
 			msg.put("msg", "Notificação removida com sucesso");
-			return new ResponseEntity<Object>(msg, HttpStatus.OK); 
-		}catch (Exception e) {
+			return new ResponseEntity<Object>(msg, HttpStatus.OK);
+		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
+			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
 		}
 	}
-	
-	@Transactional 
+
+	@Transactional
 	@GetMapping("/notification/user/{userId}/active/asc")
-	public ResponseEntity<?> getActiveNotificationByUserAndOrderAsc(@PathVariable Long userId){ 
+	public ResponseEntity<?> getActiveNotificationByUserAndOrderAsc(@PathVariable Long userId) {
 		try {
-			Optional<User> optionalUserReceived = userRepository.
-					findById(userId);			
-			if(!optionalUserReceived.isPresent()) {
-						return new ResponseEntity<String>("User logado não existe", HttpStatus.BAD_REQUEST); 
+			Optional<User> optionalUserReceived = userRepository.findById(userId);
+			if (!optionalUserReceived.isPresent()) {
+				return new ResponseEntity<String>("User logado não existe", HttpStatus.BAD_REQUEST);
 			}
 			User userReceived = optionalUserReceived.get();
 			User admin = userRepository.findByEmail("cademeubichinho02@outlook.com");
-			
+
 			List<Comment> comments = new ArrayList<Comment>();
-			if(userReceived.equals(admin)) {
-				comments = commentRepository 
-						.findAllByOrderByIdAsc(); 
-			}else {
-				comments = commentRepository 
-						.findByNotificationActiveAndUserReceivedOrderByIdAsc(true,userReceived);
-			} 
-			
-			List<Map<String, String>> commentsMap = new ArrayList<Map<String,String>>();
-			for(Comment comment: comments) {
-				Map<String, String>  map = new HashMap<String, String>();
-                map.put("id",comment.getId().toString());
-				map.put("nameUser", comment.getUserSend().getName());
-				map.put("phone", comment.getUserSend().getPhone().toString());
-				map.put("phoneWithWhats", comment.getUserSend().getPhoneWithWhats().toString());
-				
+			if (userReceived.equals(admin)) {
+				comments = commentRepository.findAllByOrderByIdAsc();
+			} else {
+				comments = commentRepository.findByNotificationActiveAndUserReceivedOrderByIdAsc(true, userReceived);
+			}
+
+			List<Map<String, String>> commentsMap = new ArrayList<Map<String, String>>();
+			for (Comment comment : comments) {
+				Map<String, String> map = new HashMap<String, String>();
+
+				map.put("id", comment.getId().toString());
+				map.put("userName", comment.getUserName());
+				map.put("userPhone", comment.getUserPhone().toString());
+				map.put("userPhoneWithWhats", comment.getUserPhoneWithWhats().toString());
+
 				map.put("name", comment.getPet().getName());
 				map.put("specie", comment.getPet().getSpecie().toString());
 				map.put("sex", comment.getPet().getSex().toString());
 				map.put("lostPet", comment.getPet().getLostPet().toString());
-				
+
 				map.put("date", comment.getDate().toString());
 				map.put("comment", comment.getComment());
 				map.put("link", comment.getLink());
 
 				commentsMap.add(map);
 			}
-			
-			return new ResponseEntity<>(commentsMap, HttpStatus.OK); 
-		}catch (Exception e) {
+
+			return new ResponseEntity<>(commentsMap, HttpStatus.OK);
+		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
+			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteComment (@PathVariable Long id){
+	public ResponseEntity<?> deleteComment(@PathVariable Long id) {
 		try {
 			Optional<Comment> comment = commentRepository.findById(id);
-			if(!comment.isPresent()) {
-				return new ResponseEntity<String>("Comentário não existe", HttpStatus.BAD_REQUEST); 
+			if (!comment.isPresent()) {
+				return new ResponseEntity<String>("Comentário não existe", HttpStatus.BAD_REQUEST);
 			}
 			Comment removeComment = comment.get();
 			commentRepository.delete(removeComment);
-			
+
 			Map<String, String> msg = new HashMap<String, String>();
 			msg.put("msg", "Comentário removido com sucesso");
-			return new ResponseEntity<>(msg, HttpStatus.OK); 
-		}catch (Exception e) {
+			return new ResponseEntity<>(msg, HttpStatus.OK);
+		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
+			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
 		}
 	}
 

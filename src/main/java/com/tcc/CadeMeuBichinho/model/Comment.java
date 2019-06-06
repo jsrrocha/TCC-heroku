@@ -17,28 +17,85 @@ public class Comment {
 	@Id 
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id; 
-	@ManyToOne
-	private Pet pet;
-	@ManyToOne
-	@JsonIgnore
-	private User userReceived;
-	@ManyToOne
-	@JsonIgnore
-	private User userSend;
+	private String userName;
+	private Long userPhone;
+	private Boolean userPhoneWithWhats;
 	private Date date; 
 	private String link;
 	private String comment;
 	private Boolean notificationActive;
+	@ManyToOne
+	@JsonIgnore
+	private Pet pet;
+	@ManyToOne
+	@JsonIgnore
+	private User userReceived;
 
 	public Comment() {
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public Long getUserPhone() {
+		return userPhone;
+	}
+
+	public void setUserPhone(Long userPhone) {
+		this.userPhone = userPhone;
+	}
+	
+	public Boolean getUserPhoneWithWhats() {
+		return userPhoneWithWhats;
+	}
+
+	public void setUserPhoneWithWhats(Boolean userPhoneWithWhats) {
+		this.userPhoneWithWhats = userPhoneWithWhats;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public Boolean getNotificationActive() {
+		return notificationActive;
+	}
+
+	public void setNotificationActive(Boolean notificationActive) {
+		this.notificationActive = notificationActive;
 	}
 
 	public Pet getPet() {
@@ -56,46 +113,5 @@ public class Comment {
 	public void setUserReceived(User userReceived) {
 		this.userReceived = userReceived;
 	}
-
-	public User getUserSend() {
-		return userSend;
-	}
-
-	public void setUserSend(User userSend) {
-		this.userSend = userSend;
-	}
-	
-	public String getComment() {
-		return comment;
-	}
-
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
-	
-	public Date getDate() {
-		return date;
-	}
-
-	public void setDate(Date date) {
-		this.date = date;
-	}
-
-	public Boolean getNotificationActive() {
-		return notificationActive;
-	}
-
-	public void setNotificationActive(Boolean notificationActive) {
-		this.notificationActive = notificationActive;
-	}
-
-	public String getLink() {
-		return link;
-	}
-
-	public void setLink(String link) {
-		this.link = link;
-	}
-
 	
 }
