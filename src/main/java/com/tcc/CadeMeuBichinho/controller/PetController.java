@@ -49,19 +49,19 @@ public class PetController {
 				return new ResponseEntity<String>("Preencha o nome do pet", HttpStatus.BAD_REQUEST); 
 			}
 			if(petMap.get("specie") == null) {
-				return new ResponseEntity<String>("Preencha a espécie do pet", HttpStatus.BAD_REQUEST); 
+				return new ResponseEntity<String>("Selecione a espécie do pet", HttpStatus.BAD_REQUEST); 
 			}
 
 			if(petMap.get("sex") == null) {
-				return new ResponseEntity<String>("Preencha o sexo do pet", HttpStatus.BAD_REQUEST); 
+				return new ResponseEntity<String>("Selecione o sexo do pet", HttpStatus.BAD_REQUEST); 
 			}
 
 			if(petMap.get("furColor") == null) {
-				return new ResponseEntity<String>("Preencha a cor do pelo do pet", HttpStatus.BAD_REQUEST); 
+				return new ResponseEntity<String>("Selecione a cor do pelo do pet", HttpStatus.BAD_REQUEST); 
 			}
 
 			if(petMap.get("lifeStage") == null) {
-				return new ResponseEntity<String>("Preencha o estágio de vida do pet", HttpStatus.BAD_REQUEST); 
+				return new ResponseEntity<String>("Selecione o estágio de vida do pet", HttpStatus.BAD_REQUEST); 
 			}
 
 			if(petMap.get("photo") == null) {
