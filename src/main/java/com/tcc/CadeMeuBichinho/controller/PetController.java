@@ -220,11 +220,12 @@ public class PetController {
 		}
 	}
 	
+	@Transactional
 	@GetMapping("/count")
 	public ResponseEntity<?> getCountPet(){
-		try {
-			Long total = petRepository.count();
-			return new ResponseEntity<>(total, HttpStatus.OK); 
+		try { 
+			List<Pet> pets = petRepository.findByRemove(false);
+			return new ResponseEntity<>(pets.size(), HttpStatus.OK); 
 		}catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST); 
@@ -313,9 +314,12 @@ public class PetController {
 			map.put("id",pet.getId().toString());
 			map.put("name",pet.getName());
 			map.put("specie", pet.getSpecie().toString());
+			map.put("specieNumber", pet.getSpecie().ordinal());
 			map.put("sex", pet.getSex().toString());
-			map.put("furColor", pet.getFurColor().toString());
+			map.put("sexNumber", pet.getSex().ordinal());
+			map.put("furColorNumber", pet.getFurColor().ordinal());
 			map.put("lifeStage", pet.getLifeStage().toString());
+			map.put("lifeStageNumber", pet.getLifeStage().ordinal());
 			map.put("date", pet.getDate().toString());
 			map.put("phone", pet.getPhone().toString());
 			map.put("phoneWithWhats",pet.getPhoneWithWhats().toString());
