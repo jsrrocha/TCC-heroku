@@ -178,6 +178,22 @@ public class PetController {
 				editPet.setName(petMap.get("name"));
 			}
 
+			Integer indexSpecie = Integer.parseInt(petMap.get("specie"));
+			Specie specie = Specie.values()[indexSpecie];  
+			editPet.setSpecie(specie); 
+			
+			Integer indexSex = Integer.parseInt(petMap.get("sex"));
+			Sex sex = Sex.values()[indexSex];  
+			editPet.setSex(sex);
+			
+			Integer indexFurColor = Integer.parseInt(petMap.get("furColor"));
+			FurColor fur = FurColor.values()[indexFurColor];  
+			editPet.setFurColor(fur);
+			
+			Integer index = Integer.parseInt(petMap.get("lifeStage"));
+			LifeStage lifeStage = LifeStage.values()[index];  
+			editPet.setLifeStage(lifeStage);
+
 			if(petMap.get("photo") != null) {
 				byte[] backToBytes = Base64.decodeBase64(petMap.get("photo"));
 				editPet.setPhoto(backToBytes);
