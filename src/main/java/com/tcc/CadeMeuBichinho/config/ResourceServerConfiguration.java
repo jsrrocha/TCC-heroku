@@ -30,6 +30,7 @@ public class ResourceServerConfiguration extends
                 .and()
                 .authorizeRequests()
                 .antMatchers("/user/**").permitAll()
+                .antMatchers("/performance/**").permitAll()
                 .antMatchers("/pet/**").permitAll()
                 .antMatchers("/comment/**").permitAll()
                 .antMatchers("/oauth/**").permitAll()
@@ -41,9 +42,6 @@ public class ResourceServerConfiguration extends
                 .antMatchers(HttpMethod.PUT, "/**").access("#oauth2.hasScope('write')")
                 .antMatchers(HttpMethod.PATCH, "/**").access("#oauth2.hasScope('write')")
                 .antMatchers(HttpMethod.DELETE, "/**").access("#oauth2.hasScope('write')");
-        
-        //http.cors(); 
-        //http.csrf().disable();
    }
 
 }

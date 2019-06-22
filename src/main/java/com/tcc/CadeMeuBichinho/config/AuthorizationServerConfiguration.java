@@ -53,7 +53,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 				.secret(pass)
 				.authorizedGrantTypes("password")
 				.authorizedGrantTypes("refresh_token")
-				.accessTokenValiditySeconds(100);
+				.accessTokenValiditySeconds(3600);
 	}
 
 	@Bean
